@@ -24,7 +24,12 @@ exports.register = async (req, res) => {
 
 }
 exports.login =  async (req, res) => {
+    const failedAttempts = {};
    try {
+    const ip = req.ip;
+    if(failedAttempts[ip] >= 5){
+        return res.status(429).json({success: false, message: 'You have send too many req'})
+    }
      const {email, password} =  req.body;
     if(!email && !password){
         return res.status(401).json({success: false, message:'email and password not found'});
