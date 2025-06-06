@@ -1,53 +1,62 @@
 const mongoose = require('mongoose');
-const { ref } = require('vue');
 
-const blogSchema = new mongoose.Schema({
+const BlogPostSchema = new mongoose.Schema({
     title: {
         type: String,
-        required:[true, "title is requried"],
-        minlength:[100, 'Title can not exceed 100 character'],
+        required: true,
+        trim: true,
+        maxlength: 200
+    },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
         trim: true
     },
-    content:{
+    content: {
         type: String,
-        required:[true, 'Content is requried'],
-
+        required: true
     },
-    author:{
+    category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        required:true
+        ref: 'Category',
+        required: true
     },
-    tags:{
+    tags: {
         type: [String],
-        default:[]
+        required: true
     },
-    featuresImages:{
-        type: String,
-        default:''
+    featuredImage: {
+        url: String,
+        publicId: String
     },
-    status:{
+    status: {
         type: String,
-        enum:['draft', 'published'],
+        enum: ['draft', 'published'],
         default: 'draft'
     },
-    createdAt:{
-        type: Date,
-        default: Date.now
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    updatedAt:{
-        type: Date,
-        default: Date.now
-    }
+    views: {
+        type: Number,
+        default: 0
+    },
+    comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Comment'
+    }]
+}, {
+    timestamps: true
 });
 
-blogSchema.pre('save', function(next){
-    this.updatedAt = Date.now();
-    next();
+// Text index for search functionality
+BlogPostSchema.index({
+    title: 'text',
+    content: 'text',
+    tags: 'text'
 });
 
-
-// text index for the search
-blogSchema.index({title:'text', content:'text', tags:'text'});
-
-module.exports = mongoose.model('BlogPost', blogSchema);
+module.exports = mongoose.model('BlogPost', BlogPostSchema);
