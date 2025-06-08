@@ -64,6 +64,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import PostDetailPage from './components/PostDetailsPage';
+import AdminPanel from './admin/AdminPanel';
+import CreateEditPost from './admin/CreateEditPosts';
 // import Register from './pages/Register';
 
 export default function App() {
@@ -76,6 +78,11 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path='/blog/details'  element={<PostDetailPage/>}/>
           {/* <Route path="/register" element={<Register/>} /> */}
+
+          {/* admin panel */}
+          <Route path='/admin/posts' element={<AdminPanel/>}/>
+          <Route path="/admin/post/new" element={<CreateEditPost />} />
+          <Route path="/admin/post/:id/edit" element={<CreateEditPost />} />
 
         </Routes>
       </div>
