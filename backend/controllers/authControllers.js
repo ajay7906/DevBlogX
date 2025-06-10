@@ -79,3 +79,34 @@ exports.logout = (req, res) => {
     res.clearCookie("token")({message:'Logged out'});
 
 };
+
+
+
+
+// admin login
+exports.adminLogin = async (req, res)=> {
+    try{
+        const {email, password} = req.body;
+        const admin = await User.findOne({email, role:'admin'});
+        if(!admin){
+            return res.status(401).json({message: 'Invalid creadentials or not an admin'});
+
+
+        }
+        // verify password (using bcrypt or similer)
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if(!isMatch){
+            return res.status(401).json({message: 'Invalid creadintals'})
+        }
+        // create the jwt
+        const token = jwt.sign(
+            {userId: admin._id, role: admin.role},
+            process.env.JWT_SECRET,
+            {expiresIn: '1h'}
+        );
+        res.status(201).json({token, userId: admin_id, role: admin.role});
+
+    }catch(error){
+        res.status(500).json({message: `Somethin went wrong ${error}`})
+    }
+}

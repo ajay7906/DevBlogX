@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const { validationBlogPostInput } = require("../validation/blogPostValidation");
 
@@ -14,7 +14,7 @@ const createBlogPost = async (req, res) => {
         const {title, content,  category, tags, status } = req.body;
         let featuredImage = {};
         if(req.file){
-=======
+
 const BlogPost = require('../models/BlogPost');
 const User = require('../models/User');
 const { uploadToCloudinary } = require('../utils/cloudinary');
@@ -36,13 +36,13 @@ const createBlogPost = async (req, res) => {
         // Handle featured image upload if present
         let featuredImage = {};
         if (req.file) {
->>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
+
             const uploadResult = await uploadToCloudinary(req.file);
             featuredImage = {
                 url: uploadResult.secure_url,
                 publicId: uploadResult.public_id
             };
-<<<<<<< HEAD
+
 
         }
 
@@ -52,14 +52,12 @@ const createBlogPost = async (req, res) => {
 
 
          // Create new post
-=======
+
         }
 
-        // Create slug from title
+       
         const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
-        // Create new post
->>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
         const newPost = new BlogPost({
             title,
             slug,
@@ -72,16 +70,11 @@ const createBlogPost = async (req, res) => {
         });
 
         const savedPost = await newPost.save();
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
-        // Update user's posts count
         await User.findByIdAndUpdate(req.user.id, { $inc: { postCount: 1 } });
 
         res.status(201).json(savedPost);
-<<<<<<< HEAD
+
         await User.findBy
 
 
@@ -115,7 +108,7 @@ module.exports = {
     createBlogPost,
 
 }
-=======
+// =======
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error while creating post' });
@@ -375,4 +368,4 @@ module.exports = {
     getPostsByAuthor,
     getAllPostsForAdmin
 };
->>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
+// >>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
