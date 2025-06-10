@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const { validationBlogPostInput } = require("../validation/blogPostValidation");
 
@@ -13,11 +14,35 @@ const createBlogPost = async (req, res) => {
         const {title, content,  category, tags, status } = req.body;
         let featuredImage = {};
         if(req.file){
+=======
+const BlogPost = require('../models/BlogPost');
+const User = require('../models/User');
+const { uploadToCloudinary } = require('../utils/cloudinary');
+const { validateBlogPostInput } = require('../validation/blogPostValidation');
+
+// @desc    Create a new blog post
+// @route   POST /api/posts
+// @access  Private (Author/Admin)
+const createBlogPost = async (req, res) => {
+    try {
+        // Validate input
+        const { errors, isValid } = validateBlogPostInput(req.body);
+        if (!isValid) {
+            return res.status(400).json(errors);
+        }
+
+        const { title, content, category, tags, status } = req.body;
+        
+        // Handle featured image upload if present
+        let featuredImage = {};
+        if (req.file) {
+>>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
             const uploadResult = await uploadToCloudinary(req.file);
             featuredImage = {
                 url: uploadResult.secure_url,
                 publicId: uploadResult.public_id
             };
+<<<<<<< HEAD
 
         }
 
@@ -27,6 +52,14 @@ const createBlogPost = async (req, res) => {
 
 
          // Create new post
+=======
+        }
+
+        // Create slug from title
+        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+
+        // Create new post
+>>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
         const newPost = new BlogPost({
             title,
             slug,
@@ -39,11 +72,16 @@ const createBlogPost = async (req, res) => {
         });
 
         const savedPost = await newPost.save();
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
         // Update user's posts count
         await User.findByIdAndUpdate(req.user.id, { $inc: { postCount: 1 } });
 
         res.status(201).json(savedPost);
+<<<<<<< HEAD
         await User.findBy
 
 
@@ -77,3 +115,264 @@ module.exports = {
     createBlogPost,
 
 }
+=======
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while creating post' });
+    }
+};
+
+// @desc    Get all published blog posts
+// @route   GET /api/posts
+// @access  Public
+const getAllBlogPosts = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Build query for published posts
+        let query = { status: 'published' };
+
+        // Add category filter if provided
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+
+        // Add tag filter if provided
+        if (req.query.tag) {
+            query.tags = req.query.tag;
+        }
+
+        // Add search query if provided
+        if (req.query.search) {
+            query.$text = { $search: req.query.search };
+        }
+
+        const posts = await BlogPost.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'username avatar')
+            .lean();
+
+        const totalPosts = await BlogPost.countDocuments(query);
+
+        res.json({
+            posts,
+            currentPage: page,
+            totalPages: Math.ceil(totalPosts / limit),
+            totalPosts
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while fetching posts' });
+    }
+};
+
+// @desc    Get a single blog post by slug
+// @route   GET /api/posts/:slug
+// @access  Public
+const getBlogPostBySlug = async (req, res) => {
+    try {
+        const post = await BlogPost.findOne({ slug: req.params.slug })
+            .populate('author', 'username avatar bio')
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'author',
+                    select: 'username avatar'
+                }
+            });
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Increment view count if post is published
+        if (post.status === 'published') {
+            post.views += 1;
+            await post.save();
+        }
+
+        res.json(post);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while fetching post' });
+    }
+};
+
+// @desc    Update a blog post
+// @route   PUT /api/posts/:id
+// @access  Private (Author/Admin)
+const updateBlogPost = async (req, res) => {
+    try {
+        // Validate input
+        const { errors, isValid } = validateBlogPostInput(req.body);
+        if (!isValid) {
+            return res.status(400).json(errors);
+        }
+
+        const { title, content, category, tags, status } = req.body;
+        
+        // Find the post
+        let post = await BlogPost.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Check if user is author or admin
+        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not authorized to update this post' });
+        }
+
+        // Handle featured image update if present
+        let featuredImage = post.featuredImage;
+        if (req.file) {
+            // Delete old image if exists
+            if (featuredImage.publicId) {
+                await deleteFromCloudinary(featuredImage.publicId);
+            }
+            
+            const uploadResult = await uploadToCloudinary(req.file);
+            featuredImage = {
+                url: uploadResult.secure_url,
+                publicId: uploadResult.public_id
+            };
+        }
+
+        // Update slug if title changed
+        let slug = post.slug;
+        if (title !== post.title) {
+            slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+        }
+
+        // Update post
+        post.title = title;
+        post.slug = slug;
+        post.content = content;
+        post.category = category;
+        post.tags = tags.split(',').map(tag => tag.trim());
+        post.featuredImage = featuredImage;
+        post.status = status || post.status;
+        post.updatedAt = Date.now();
+
+        const updatedPost = await post.save();
+        res.json(updatedPost);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while updating post' });
+    }
+};
+
+// @desc    Delete a blog post
+// @route   DELETE /api/posts/:id
+// @access  Private (Author/Admin)
+const deleteBlogPost = async (req, res) => {
+    try {
+        const post = await BlogPost.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        // Check if user is author or admin
+        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not authorized to delete this post' });
+        }
+
+        // Delete featured image if exists
+        if (post.featuredImage.publicId) {
+            await deleteFromCloudinary(post.featuredImage.publicId);
+        }
+
+        await post.remove();
+        
+        // Update user's posts count
+        await User.findByIdAndUpdate(req.user.id, { $inc: { postCount: -1 } });
+
+        res.json({ success: true, message: 'Post deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while deleting post' });
+    }
+};
+
+// @desc    Get posts by author
+// @route   GET /api/posts/author/:authorId
+// @access  Public
+const getPostsByAuthor = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const query = { 
+            author: req.params.authorId,
+            status: 'published'
+        };
+
+        const posts = await BlogPost.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'username avatar')
+            .lean();
+
+        const totalPosts = await BlogPost.countDocuments(query);
+
+        res.json({
+            posts,
+            currentPage: page,
+            totalPages: Math.ceil(totalPosts / limit),
+            totalPosts
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while fetching author posts' });
+    }
+};
+
+// @desc    Get all posts for admin dashboard (including drafts)
+// @route   GET /api/admin/posts
+// @access  Private (Admin)
+const getAllPostsForAdmin = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const posts = await BlogPost.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'username avatar')
+            .lean();
+
+        const totalPosts = await BlogPost.countDocuments();
+
+        res.json({
+            posts,
+            currentPage: page,
+            totalPages: Math.ceil(totalPosts / limit),
+            totalPosts
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error while fetching posts for admin' });
+    }
+};
+
+module.exports = {
+    createBlogPost,
+    getAllBlogPosts,
+    getBlogPostBySlug,
+    updateBlogPost,
+    deleteBlogPost,
+    getPostsByAuthor,
+    getAllPostsForAdmin
+};
+>>>>>>> 7a78ff86356db4d540666d7ac1a44182336e51bb
