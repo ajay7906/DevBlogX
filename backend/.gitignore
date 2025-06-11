@@ -1,1 +1,3 @@
 /node_modules
+# add in gitignore of dot
+/.env
