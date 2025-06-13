@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({error:"User is already exist"});
         };
         const user = await User.create({name, email, password});
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+        const token = jwt.sign({id: user._id}, 'ABC123CDZ', {
             expiresIn: "1d",
         });
         res.cookie("token", token, {httpOnly: true}).status(201).json(user);
@@ -61,7 +61,7 @@ exports.login =  async (req, res) => {
     await User.updateOne({email}, {loginAttampts: 0,  blockExperies: null});
 
     //gnerate JWT token
-    const token = jwt.sign({id: user._id}, process.jwt.JWT_SECRET, {
+    const token = jwt.sign({id: user._id}, 'ABC123CDZ', {
         expiresIn:"id"
     });
     res.cookie("token", token, {httpOnly: true, secure: true}).json({existUser});
@@ -87,6 +87,9 @@ exports.logout = (req, res) => {
 exports.adminLogin = async (req, res)=> {
     try{
         const {email, password} = req.body;
+        if(!email && !password){
+            return res.status(401).json({success: false, message: 'email && password is required'});
+        }
         const admin = await User.findOne({email, role:'admin'});
         if(!admin){
             return res.status(401).json({message: 'Invalid creadentials or not an admin'});
@@ -101,10 +104,10 @@ exports.adminLogin = async (req, res)=> {
         // create the jwt
         const token = jwt.sign(
             {userId: admin._id, role: admin.role},
-            process.env.JWT_SECRET,
-            {expiresIn: '1h'}
+            'ABC123CDZ',
+            {expiresIn: '24h'}
         );
-        res.status(201).json({token, userId: admin_id, role: admin.role});
+        res.status(201).json({token, userId: admin._id, role: admin.role});
 
     }catch(error){
         res.status(500).json({message: `Somethin went wrong ${error}`})
