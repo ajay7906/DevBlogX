@@ -22,12 +22,16 @@ connectDb();
 // Middleware
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
+// app.use(express.json());
 app.use(cookieParser());
 app.use(limiter);
-
+const blogRoutes = require('./routes/blogPostRoutes');
+const categoryRoutes = require("./routes/categoryRoutes");
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/category", categoryRoutes);
 
 // DB Connection
 // mongoose.connect(process.env.MONGO_URI)

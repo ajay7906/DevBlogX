@@ -1,7 +1,7 @@
-const BlogPost = require('../models/BlogPost');
+const BlogPost = require('../models/Blog');
 const User = require('../models/User');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
-const { validateBlogPostInput } = require('../validation/blogPostValidation');
+const { validationBlogPostInput } = require('../validation/blogPostValidation');
 
 // @desc    Create a new blog post
 // @route   POST /api/posts
@@ -9,7 +9,7 @@ const { validateBlogPostInput } = require('../validation/blogPostValidation');
 const createBlogPost = async (req, res) => {
     try {
         // Validate input
-        const { errors, isValid } = validateBlogPostInput(req.body);
+        const { errors, isValid } = validationBlogPostInput(req.body);
         if (!isValid) {
             return res.status(400).json(errors);
         }
@@ -38,18 +38,18 @@ const createBlogPost = async (req, res) => {
             tags: tags.split(',').map(tag => tag.trim()),
             featuredImage,
             status: status || 'draft',
-            author: req.user.id
+            author: req.userData.userId
         });
 
         const savedPost = await newPost.save();
 
         // Update user's post count
-        await User.findByIdAndUpdate(req.user.id, { $inc: { postCount: 1 } });
+        await User.findByIdAndUpdate(req.userData.userId, { $inc: { postCount: 1 } });
 
         res.status(201).json(savedPost);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Server error while creating post' });
+        res.status(500).json({ error: `Server error while creating post ${err}` });
     }
 };
 

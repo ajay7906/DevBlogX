@@ -2,9 +2,9 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: 'instacone',
+    api_key: '169135177826417',
+    api_secret: 'OXuK15JwJt0migMs8RJP1imQRyY',
 });
 
 

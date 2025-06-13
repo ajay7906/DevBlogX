@@ -1,5 +1,5 @@
 const Category = require('../models/Category');
-const BlogPost = require('../models/BlogPost');
+const BlogPost = require('../models/Blog');
 const { validateCategoryInput } = require('../validation/categoryValidation');
 
 // @desc    Create a new category
@@ -7,7 +7,7 @@ const { validateCategoryInput } = require('../validation/categoryValidation');
 // @access  Private (Admin)
 const createCategory = async (req, res) => {
     try {
-        if (req.user.role !== 'admin') {
+        if (req.userData.role !== 'admin') {
             return res.status(403).json({ error: 'Not authorized' });
         }
 
@@ -36,10 +36,13 @@ const createCategory = async (req, res) => {
         });
 
         const savedCategory = await newCategory.save();
-        res.status(201).json(savedCategory);
+        res.status(201).json({
+            data:savedCategory,
+            categoryId: newCategory._id
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Server error while creating category' });
+        res.status(500).json({ error: `Server error while creating category ${err}` });
     }
 };
 
