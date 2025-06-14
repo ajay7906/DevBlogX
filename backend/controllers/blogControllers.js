@@ -56,6 +56,10 @@ const createBlogPost = async (req, res) => {
 // @desc    Get all published blog posts
 // @route   GET /api/posts
 // @access  Public
+
+
+
+
 const getAllBlogPosts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -101,6 +105,21 @@ const getAllBlogPosts = async (req, res) => {
         res.status(500).json({ error: 'Server error while fetching posts' });
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // @desc    Get a single blog post by slug
 // @route   GET /api/posts/:slug

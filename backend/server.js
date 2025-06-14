@@ -7,6 +7,12 @@ const authRoutes = require("./routes/authRoutes");
 const rateLimit = require('express-rate-limit');
 const connectDb = require("./config/db");
 
+// const dns = require('dns');
+// dns.setDefaultResultOrder('ipv4first');
+// const dns = require('dns');
+// dns.setDefaultResultOrder('ipv4first');
+
+
 
 
 const app = express();
