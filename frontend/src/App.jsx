@@ -66,6 +66,7 @@ import Login from './pages/Login';
 import PostDetailPage from './components/PostDetailsPage';
 import AdminPanel from './admin/AdminPanel';
 import CreateEditPost from './admin/CreateEditPosts';
+import AllBlog from './pages/AllBlog';
 // import Register from './pages/Register';
 
 export default function App() {
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path='/blog/details'  element={<PostDetailPage/>}/>
+          <Route path='/blog/all' element={<AllBlog/>}/>
           {/* <Route path="/register" element={<Register/>} /> */}
 
           {/* admin panel */}
