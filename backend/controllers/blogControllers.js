@@ -88,7 +88,7 @@ const getAllBlogPosts = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('author', 'username avatar')
+            .populate('author', 'name')
             .populate('category', 'name')
             .lean();
 

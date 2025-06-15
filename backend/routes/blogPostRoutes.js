@@ -7,7 +7,7 @@ const isAdmin = require('../middleware/isAdmin');
 
 
 // Public routes
-router.get('/', blogPostController.getAllBlogPosts);
+router.get('/getAllBlog', blogPostController.getAllBlogPosts);
 router.get('/:slug', blogPostController.getBlogPostBySlug);
 router.get('/author/:authorId', blogPostController.getPostsByAuthor);
 
