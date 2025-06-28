@@ -15,8 +15,10 @@ router.get('/author/:authorId', blogPostController.getPostsByAuthor);
 router.post('/postblog', isAdmin,  upload.single('featuredImage'), blogPostController.createBlogPost);
 router.put('/:id', isAdmin,  upload.single('featuredImage'), blogPostController.updateBlogPost);
 router.delete('/:id',isAdmin,  blogPostController.deleteBlogPost);
+router.get('/getpostbyid/:blogId', blogPostController.getBlogPostById);
 
 // Admin-only routes
 router.get('/admin/posts',  blogPostController.getAllPostsForAdmin);
+
 
 module.exports = router;

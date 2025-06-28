@@ -331,6 +331,26 @@ const getAllPostsForAdmin = async (req, res) => {
     }
 };
 
+const getBlogPostById = async (req, res) => {
+   try{
+    const {blogId} = req.params;
+    if(!blogId) {
+        return res.status(400).json({ error: 'Blog ID is required' });
+    }
+    const blogDetails = await BlogPost.find({ _id: blogId });
+    if(!blogDetails || blogDetails.length === 0) {
+        return res.status(404).json({ error: 'Blog post not found' });
+    }
+    return res.status(200).json({
+        success: true,
+        data: blogDetails
+    })
+   } catch(error){
+    console.error(error);
+    return res.status(500).json({ error: `Server error while fetching blog post by ID ${error}` });
+   }
+}
+
 module.exports = {
     createBlogPost,
     getAllBlogPosts,
@@ -338,5 +358,6 @@ module.exports = {
     updateBlogPost,
     deleteBlogPost,
     getPostsByAuthor,
-    getAllPostsForAdmin
+    getAllPostsForAdmin,
+    getBlogPostById
 };
