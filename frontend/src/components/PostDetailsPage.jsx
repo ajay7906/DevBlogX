@@ -439,8 +439,8 @@ const dummyPost = {
     <h2>Conclusion</h2>
     <p>The future of web development is bright, with technologies like AI, WebAssembly, and low-code platforms leading the way. Developers who embrace these trends will be well-positioned to create innovative, user-centric web experiences.</p>
   `,
-  author: "Sarah Chen",
-  authorBio: "Senior Full Stack Developer at TechCorp",
+  author: "Ajay Kumar",
+  authorBio: " Full Stack Developer at Lifelayer",
   authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
   date: "2025-06-05",
   readTime: "8 min read",

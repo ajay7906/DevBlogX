@@ -26,7 +26,7 @@ connectDb();
 
 
 // Middleware
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use(express.json());
 // app.use(express.json());
 app.use(cookieParser());

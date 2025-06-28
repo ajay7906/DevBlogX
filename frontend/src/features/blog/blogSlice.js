@@ -7,9 +7,10 @@ export const fetchBlogPosts = createAsyncThunk(
   async (params, { rejectWithValue }) => {
     try {
       const { page = 1, limit = 10, category, tag, search } = params;
-      const response = await axios.get('/api/blogposts', {
+      const response = await axios.get('http://localhost:5000/api/blog/getAllBlog', {
         params: { page, limit, category, tag, search }
       });
+      console.log('Fetched posts:', response.data);
       return response.data;
     } catch (err) {
       return rejectWithValue(err.response.data);
