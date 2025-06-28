@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Filter, Tag, X, ChevronDown, ChevronUp, Grid, List, Star, Flame, Zap, Users, Award, Bookmark, Heart, MessageCircle, Eye, ArrowRight, Clock } from 'lucide-react';
-
+import {useSelector, useDispatch} from 'react-redux';
+import {fetchBlogPosts, setFilters, setPage} from '../features/blog/blogSlice';
 const AllBlogsPage = () => {
   // State for filtering
   const [searchQuery, setSearchQuery] = useState('');
