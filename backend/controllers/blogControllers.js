@@ -331,6 +331,80 @@ const getAllPostsForAdmin = async (req, res) => {
     }
 };
 
+
+const toggleLiked = async (req, res) => {
+   try{
+     const post = await BlogPost.findById(req.params.id);
+    if(!post){
+        return res.status(404).json({
+            success: false,
+            message:'Post not found'
+        });
+    };
+    const userId = req.userData.userId;
+    const hasLiked = post.likes.includes(userId);
+    if(hasLiked){
+        post.likes.pull(userId);
+        post.likeCount -= 1;
+    }else{
+        post.likes.push(userId);
+        post.likeCount += 1;
+    }
+
+    const updatedPost = await post.save();
+
+     res.json({
+            success: true,
+            message: hasLiked ? 'Post unliked successfully' : 'Post liked successfully',
+            isLiked: !hasLiked,
+            likeCount: updatedPost.likeCount,
+            post: {
+                id: updatedPost._id,
+                title: updatedPost.title,
+                slug: updatedPost.slug
+            }
+        });
+
+   }catch(error){
+    console.error('Server error', error);
+    res.status(500).json({
+        success: false,
+        message:`Server error ${error}`
+    })
+   }
+
+}
+
+
+const getLikesStatus = async (req, res) => {
+    try{
+        const post = await BlogPost.findById(req.params.id);
+        if(!post){
+            return res.status(404).json({
+                success: false,
+                message:`post not found`
+            });
+        };
+        const hasLiked = post.likes.includes(req.userData.userId);
+        return res.status(200).json({
+            success: false,
+            message:'Post find the like ',
+            isLiked: hasLiked,
+            likeCount: post.likeCount
+        });
+
+    }catch(error){
+        console.error('Server error', error);
+        res.status(500).json({
+            success: false,
+            message:`Server error ${error}`
+        });
+    }
+}
+
+
+
+
 module.exports = {
     createBlogPost,
     getAllBlogPosts,
@@ -338,5 +412,7 @@ module.exports = {
     updateBlogPost,
     deleteBlogPost,
     getPostsByAuthor,
-    getAllPostsForAdmin
+    getAllPostsForAdmin,
+    toggleLiked,
+    getLikesStatus
 };

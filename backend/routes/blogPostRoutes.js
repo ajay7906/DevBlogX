@@ -18,5 +18,8 @@ router.delete('/:id',isAdmin,  blogPostController.deleteBlogPost);
 
 // Admin-only routes
 router.get('/admin/posts',  blogPostController.getAllPostsForAdmin);
+// likes controlers
+router.put('/toogle_like/:id', blogPostController.toggleLiked);
+router.get('/get_like/:id', blogPostController.getLikesStatus);
 
 module.exports = router;
