@@ -331,7 +331,7 @@ const getAllPostsForAdmin = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
+
 
 const toggleLiked = async (req, res) => {
    try{
@@ -406,7 +406,7 @@ const getLikesStatus = async (req, res) => {
 
 
 
-=======
+
 const getBlogPostById = async (req, res) => {
    try{
     const {blogId} = req.params;
@@ -427,7 +427,7 @@ const getBlogPostById = async (req, res) => {
    }
 }
 
->>>>>>> 7eff14c8093c87144a7695d50e83710f2ebc2528
+// >>>>>>> 7eff14c8093c87144a7695d50e83710f2ebc2528
 module.exports = {
     createBlogPost,
     getAllBlogPosts,
@@ -436,10 +436,8 @@ module.exports = {
     deleteBlogPost,
     getPostsByAuthor,
     getAllPostsForAdmin,
-<<<<<<< HEAD
     toggleLiked,
-    getLikesStatus
-=======
+    getLikesStatus,
+
     getBlogPostById
->>>>>>> 7eff14c8093c87144a7695d50e83710f2ebc2528
 };
