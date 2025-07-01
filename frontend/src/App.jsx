@@ -77,7 +77,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path='/blog/details'  element={<PostDetailPage/>}/>
+          <Route path='/blog/:postId'  element={<PostDetailPage/>}/>
           <Route path='/blog/all' element={<AllBlog/>}/>
           {/* <Route path="/register" element={<Register/>} /> */}
 

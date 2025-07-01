@@ -1,227 +1,76 @@
+
+
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, Filter, Tag, X, ChevronDown, ChevronUp, Grid, List, Star, Flame, Zap, Users, Award, Bookmark, Heart, MessageCircle, Eye, ArrowRight, Clock } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchBlogPosts, setFilters, setPage } from '../features/blog/blogSlice';
+import {Link} from 'react-router-dom'
 
 const AllBlogsPage = () => {
-  // State for filtering
+  // State for client-side filtering
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [sortBy, setSortBy] = useState('latest');
   const [viewMode, setViewMode] = useState('grid');
-  const [currentPage, setCurrentPage] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const postsPerPage = 9;
   
-  // Sample blog data (same as home page)
-  const allPosts = [
-    {
-      id: 1,
-      title: "The Future of Web Development: Trends to Watch in 2025",
-      excerpt: "Explore the cutting-edge technologies and frameworks that will shape web development in the coming years. From AI integration to quantum computing implications...",
-      content: "Full article content here...",
-      author: "Sarah Chen",
-      authorBio: "Senior Full Stack Developer at TechCorp",
-      authorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-      date: "2025-06-05",
-      readTime: "8 min read",
-      views: 2487,
-      likes: 156,
-      comments: 23,
-      shares: 45,
-      category: "Technology",
-      tags: ["React", "AI", "WebDev", "Future"],
-      image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=400&fit=crop",
-      featured: true,
-      trending: true,
-      difficulty: "Intermediate",
-      rating: 4.8,
-      premium: false
-    },
-    {
-      id: 2,
-      title: "Building Scalable React Applications with Redux Toolkit",
-      excerpt: "Learn how to structure and manage state in large React applications using modern Redux patterns and best practices for maintainable code...",
-      author: "Alex Johnson",
-      authorBio: "React Specialist & Open Source Contributor",
-      authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      date: "2025-06-03",
-      readTime: "12 min read",
-      views: 1834,
-      likes: 134,
-      comments: 18,
-      shares: 32,
-      category: "Development",
-      tags: ["React", "Redux", "JavaScript", "Architecture"],
-      image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
-      featured: true,
-      trending: false,
-      difficulty: "Advanced",
-      rating: 4.9,
-      premium: true
-    },
-    {
-      id: 3,
-      title: "The Art of Technical Writing: A Complete Guide",
-      excerpt: "Master the skills needed to create clear, engaging technical documentation that developers actually want to read and understand...",
-      author: "Maria Rodriguez",
-      authorBio: "Technical Writer & Developer Advocate",
-      authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      date: "2025-06-01",
-      readTime: "10 min read",
-      views: 3156,
-      likes: 289,
-      comments: 45,
-      shares: 78,
-      category: "Writing",
-      tags: ["Documentation", "Communication", "Career"],
-      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&h=400&fit=crop",
-      featured: true,
-      trending: true,
-      difficulty: "Beginner",
-      rating: 4.7,
-      premium: false
-    },
-    {
-      id: 4,
-      title: "Mastering CSS Grid: Advanced Layout Techniques",
-      excerpt: "Deep dive into CSS Grid with practical examples and advanced techniques for creating complex, responsive layouts...",
-      author: "Emma Wilson",
-      authorBio: "UI/UX Designer & Frontend Developer",
-      authorAvatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-30",
-      readTime: "15 min read",
-      views: 2234,
-      likes: 198,
-      comments: 34,
-      shares: 56,
-      category: "CSS",
-      tags: ["CSS", "Layout", "Design", "Responsive"],
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
-      featured: false,
-      trending: true,
-      difficulty: "Intermediate",
-      rating: 4.6,
-      premium: false
-    },
-    {
-      id: 5,
-      title: "Node.js Performance Optimization Strategies",
-      excerpt: "Boost your Node.js application performance with proven optimization techniques and monitoring strategies...",
-      author: "David Kim",
-      authorBio: "Backend Engineer & Performance Specialist",
-      authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-28",
-      readTime: "18 min read",
-      views: 1876,
-      likes: 167,
-      comments: 29,
-      shares: 41,
-      category: "Backend",
-      tags: ["Node.js", "Performance", "Optimization"],
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop",
-      featured: false,
-      trending: false,
-      difficulty: "Advanced",
-      rating: 4.8,
-      premium: true
-    },
-    {
-      id: 6,
-      title: "TypeScript Best Practices for Large Projects",
-      excerpt: "Learn how to effectively use TypeScript in enterprise-level applications with these proven best practices...",
-      author: "Michael Thompson",
-      authorBio: "Senior Software Engineer at TechSolutions",
-      authorAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-25",
-      readTime: "14 min read",
-      views: 2543,
-      likes: 210,
-      comments: 38,
-      shares: 62,
-      category: "Development",
-      tags: ["TypeScript", "JavaScript", "Best Practices"],
-      image: "https://images.unsplash.com/photo-1618044733300-9472054094ee?w=800&h=400&fit=crop",
-      featured: false,
-      trending: true,
-      difficulty: "Intermediate",
-      rating: 4.7,
-      premium: false
-    },
-    {
-      id: 7,
-      title: "Building Accessible Web Applications",
-      excerpt: "Create web applications that everyone can use by following these accessibility guidelines and techniques...",
-      author: "Jennifer Lee",
-      authorBio: "Accessibility Specialist & Frontend Developer",
-      authorAvatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-22",
-      readTime: "11 min read",
-      views: 1987,
-      likes: 176,
-      comments: 27,
-      shares: 49,
-      category: "Development",
-      tags: ["Accessibility", "UI", "Inclusive Design"],
-      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=400&fit=crop",
-      featured: false,
-      trending: false,
-      difficulty: "Intermediate",
-      rating: 4.9,
-      premium: false
-    },
-    {
-      id: 8,
-      title: "The Ultimate Guide to Docker for Developers",
-      excerpt: "Master containerization with Docker to streamline your development workflow and deployment process...",
-      author: "Robert Davis",
-      authorBio: "DevOps Engineer & Cloud Specialist",
-      authorAvatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-18",
-      readTime: "20 min read",
-      views: 3120,
-      likes: 254,
-      comments: 42,
-      shares: 71,
-      category: "DevOps",
-      tags: ["Docker", "Containers", "DevOps"],
-      image: "https://images.unsplash.com/photo-1625832018968-0a4d0dda9d4d?w=800&h=400&fit=crop",
-      featured: true,
-      trending: true,
-      difficulty: "Advanced",
-      rating: 4.8,
-      premium: true
-    },
-    {
-      id: 9,
-      title: "Getting Started with GraphQL",
-      excerpt: "Learn the fundamentals of GraphQL and how to implement it in your next project for efficient data fetching...",
-      author: "Sophia Williams",
-      authorBio: "Full Stack Developer & API Specialist",
-      authorAvatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop&crop=face",
-      date: "2025-05-15",
-      readTime: "9 min read",
-      views: 1872,
-      likes: 143,
-      comments: 21,
-      shares: 37,
-      category: "API",
-      tags: ["GraphQL", "API", "Backend"],
-      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop",
-      featured: false,
-      trending: false,
-      difficulty: "Beginner",
-      rating: 4.5,
-      premium: false
-    }
-  ];
+  const postsPerPage = 9;
+  const dispatch = useDispatch();
+  
+  // Access Redux state
+  const {
+    posts: apiPosts,  // Array of posts from API
+    currentPage: reduxCurrentPage,
+    totalPages: reduxTotalPages,
+    totalPosts: reduxTotalPosts,
+    loading,
+    error,
+    filters: reduxFilters
+  } = useSelector((state) => state.posts);
+
+  // Fetch posts on mount and when filters/page changes
+  useEffect(() => {
+    dispatch(fetchBlogPosts({
+      page: reduxCurrentPage,
+      limit: postsPerPage,
+      ...reduxFilters
+    }));
+  }, [reduxCurrentPage, reduxFilters, dispatch]);
+
+  // Transform API data to match component structure
+  const transformedPosts = apiPosts.map(post => ({
+    id: post._id,
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.content.substring(0, 150) + '...',
+    content: post.content,
+    author: post.author.name,
+    authorBio: "Author information",
+    authorAvatar: "https://via.placeholder.com/100",
+    date: post.createdAt,
+    readTime: `${Math.ceil(post.content.length / 1000)} min read`,
+    views: post.views || 0,
+    likes: 0, // Not in API
+    comments: post.comments?.length || 0,
+    shares: 0, // Not in API
+    category: post.category?.name || "Uncategorized",
+    tags: post.tags || [],
+    image: post.featuredImage?.url || "https://via.placeholder.com/800x400",
+    featured: false,
+    trending: false,
+    difficulty: "Beginner",
+    rating: 4.5,
+    premium: false
+  }));
 
   // Extract all unique categories and tags
-  const categories = [...new Set(allPosts.map(post => post.category))];
-  const allTags = [...new Set(allPosts.flatMap(post => post.tags))];
+  const categories = [...new Set(transformedPosts.map(post => post.category))];
+  const allTags = [...new Set(transformedPosts.flatMap(post => post.tags))];
 
   // Filter posts based on selected criteria
-  const filteredPosts = allPosts.filter(post => {
+  const filteredPosts = transformedPosts.filter(post => {
     // Search filter
     const matchesSearch = 
       searchQuery === '' || 
@@ -272,8 +121,8 @@ const AllBlogsPage = () => {
   // Pagination
   const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
   const paginatedPosts = sortedPosts.slice(
-    (currentPage - 1) * postsPerPage,
-    currentPage * postsPerPage
+    (reduxCurrentPage - 1) * postsPerPage,
+    reduxCurrentPage * postsPerPage
   );
 
   // Toggle category selection
@@ -301,7 +150,13 @@ const AllBlogsPage = () => {
     setSelectedTags([]);
     setDateRange({ start: '', end: '' });
     setSortBy('latest');
-    setCurrentPage(1);
+    dispatch(setPage(1));
+  };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    dispatch(setPage(page));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Difficulty badge color
@@ -313,6 +168,37 @@ const AllBlogsPage = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-lg text-gray-700">Loading posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h3 className="text-2xl font-bold mb-2">Error Loading Content</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
@@ -456,7 +342,7 @@ const AllBlogsPage = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Filters Sidebar (always visible on large screens, conditional on mobile) */}
+            {/* Filters Sidebar */}
             <div className={`lg:col-span-1 ${isFiltersOpen ? 'block' : 'hidden lg:block'}`}>
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -561,7 +447,7 @@ const AllBlogsPage = () => {
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-2xl font-bold">
-                    {filteredPosts.length} Posts Found
+                    {reduxTotalPosts} Posts Found
                   </h2>
                   {selectedCategories.length > 0 && (
                     <p className="text-gray-600">
@@ -571,7 +457,7 @@ const AllBlogsPage = () => {
                 </div>
                 
                 <div className="text-gray-600">
-                  Page {currentPage} of {totalPages}
+                  Page {reduxCurrentPage} of {reduxTotalPages}
                 </div>
               </div>
               
@@ -671,12 +557,12 @@ const AllBlogsPage = () => {
                           </div>
                         </div>
                         
-                        <a 
-                          href={`/post/${post.id}`}
+                        <Link 
+                          to={`/blog/${post.id}`}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                         >
                           Read more <ArrowRight className="h-4 w-4 ml-1" />
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </article>
@@ -684,22 +570,22 @@ const AllBlogsPage = () => {
               </div>
               
               {/* Pagination */}
-              {totalPages > 1 && (
+              {reduxTotalPages > 1 && (
                 <div className="mt-8 flex justify-center space-x-2">
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(Math.max(reduxCurrentPage - 1, 1))}
+                    disabled={reduxCurrentPage === 1}
                     className="px-4 py-2 bg-white rounded-lg shadow-md disabled:opacity-50 hover:bg-gray-100 transition"
                   >
                     Prev
                   </button>
                   
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  {Array.from({ length: reduxTotalPages }, (_, i) => i + 1).map(page => (
                     <button
                       key={page}
-                      onClick={() => setCurrentPage(page)}
+                      onClick={() => handlePageChange(page)}
                       className={`px-4 py-2 rounded-lg ${
-                        currentPage === page
+                        reduxCurrentPage === page
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-gray-700 hover:bg-gray-100'
                       } transition`}
@@ -709,8 +595,8 @@ const AllBlogsPage = () => {
                   ))}
                   
                   <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(Math.min(reduxCurrentPage + 1, reduxTotalPages))}
+                    disabled={reduxCurrentPage === reduxTotalPages}
                     className="px-4 py-2 bg-white rounded-lg shadow-md disabled:opacity-50 hover:bg-gray-100 transition"
                   >
                     Next
@@ -719,7 +605,7 @@ const AllBlogsPage = () => {
               )}
               
               {/* No results message */}
-              {filteredPosts.length === 0 && (
+              {apiPosts.length === 0 && !loading && (
                 <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                   <div className="text-5xl mb-4">🔍</div>
                   <h3 className="text-2xl font-bold mb-2">No matching posts found</h3>
