@@ -313,6 +313,33 @@ export const fetchPostById = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching all blog posts
+export const toggleLike = createAsyncThunk(
+  'posts/toggleLike',
+  async (postId, { rejectWithValue, getState }) => {
+    try {
+      console.log("toggle like function called");
+      const { auth } = getState();
+      const token = auth?.user?.token;
+      if (!token) return rejectWithValue({ error: 'Not authenticated' });
+
+      const res = await axios.put(
+        `http://localhost:5000/api/blog/toogle_like/${postId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      return { postId, isLiked: res.data.isLiked, likeCount: res.data.likeCount };
+    } catch (err) {
+      console.log("error in toggle like", err);
+      return rejectWithValue(err.response?.data || { error: 'Toggle like failed' });
+    }
+  }
+);
+
+
+
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState: {
@@ -367,6 +394,30 @@ const postsSlice = createSlice({
       .addCase(fetchPostById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.error || 'Failed to fetch post';
+      })
+
+      // toggle like
+      .addCase(toggleLike.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(toggleLike.fulfilled, (state, action) => {
+        state.loading = false;
+        const { postId, isLiked, likeCount } = action.payload;
+        
+        // Update selected post
+        if (state.selectedPost?.id === postId) {
+          state.selectedPost.likes = likeCount;
+        }
+        
+        // Update post in posts list
+        const postIndex = state.posts.findIndex(post => post.id === postId);
+        if (postIndex !== -1) {
+          state.posts[postIndex].likes = likeCount;
+        }
+      })
+      .addCase(toggleLike.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.error || 'Like failed';
       });
   }
 });
