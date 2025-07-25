@@ -342,6 +342,7 @@ const toggleLiked = async (req, res) => {
             message:'Post not found'
         });
     };
+    console.log('CLICKED');
     const userId = req.userData.userId;
     const hasLiked = post.likes.includes(userId);
     if(hasLiked){
